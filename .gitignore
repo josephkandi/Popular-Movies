@@ -36,3 +36,5 @@ google-services.json
 .DS_Store
 /captures
 .externalNativeBuild
+app/libs/
+app/src/main/res/drawable/
