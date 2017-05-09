@@ -1,9 +1,38 @@
-*.iml
-.gradle
+# Generated files
+bin/
+gen/
+out/
+
+# Gradle files
+.gradle/
+build/
 /local.properties
-/.idea/workspace.xml
-/.idea/libraries
+
+# Built application files
+*.apk
+
+
+# Files for the ART/Dalvik VM
+*.dex
+
+# Java class files
+*.class
+
+# Intellij
+*.iml
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/gradle.xml
+.idea/dictionaries
+.idea/libraries
+
+# Google Services (e.g. APIs or Firebase)
+google-services.json
+
+# Log Files
+*.log
+
+
 .DS_Store
-/build
 /captures
 .externalNativeBuild
