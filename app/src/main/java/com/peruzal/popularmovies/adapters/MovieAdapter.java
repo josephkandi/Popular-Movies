@@ -1,7 +1,6 @@
 package com.peruzal.popularmovies.adapters;
 
 import android.content.Context;
-import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -21,13 +20,15 @@ import java.util.List;
  * Created by joseph on 5/10/17.
  */
 
-public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHolder> {
+public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHolder>{
     private static final String TAG = MovieAdapter.class.getSimpleName();
     private List<Movie> mMovies;
     private Context mContext;
+    private IMovieClickListener mMovieClickLister;
 
-    public MovieAdapter(Context mContext) {
+    public MovieAdapter(Context mContext, IMovieClickListener clickListener) {
         this.mContext = mContext;
+        this.mMovieClickLister = clickListener;
     }
 
     @Override
@@ -39,12 +40,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
     @Override
     public void onBindViewHolder(MovieViewHolder holder, int position) {
         Movie movie = mMovies.get(position);
-        String apiKey = mContext.getString(R.string.api_key);
-        String movieUrl = Uri.parse(NetworkUtils.BASE_IMAGE_URL).buildUpon()
-                        .appendEncodedPath(movie.posterPath)
-                        .appendQueryParameter(NetworkUtils.QUERY_PARAM_API_KEY, apiKey)
-                        .build()
-                        .toString();
+        String movieUrl = NetworkUtils.buildPostImageUrl(mContext,movie.posterPath);
         if (BuildConfig.DEBUG) {
             Log.d(TAG, movieUrl);
             Log.d(TAG, movie.toString());
@@ -61,10 +57,17 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
         return mMovies.size();
     }
 
-    public class MovieViewHolder extends RecyclerView.ViewHolder{
+
+    public class MovieViewHolder extends RecyclerView.ViewHolder {
         public ImageView mPosterImageView;
         public MovieViewHolder(View itemView) {
             super(itemView);
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mMovieClickLister.onItemClick(getAdapterPosition());
+                }
+            });
             mPosterImageView = (ImageView) itemView.findViewById(R.id.imgPosterImage);
         }
     }
@@ -72,5 +75,9 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
     public void setMovieData(List<Movie> movies){
         mMovies = movies;
         notifyDataSetChanged();
+    }
+
+    public interface IMovieClickListener{
+      void onItemClick(int position);
     }
 }

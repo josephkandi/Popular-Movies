@@ -1,12 +1,16 @@
 package com.peruzal.popularmovies.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.widget.ContentLoadingProgressBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import com.android.volley.VolleyError;
 import com.google.gson.Gson;
@@ -19,7 +23,7 @@ import com.peruzal.popularmovies.utils.NetworkUtils;
 import java.net.MalformedURLException;
 import java.util.List;
 
-public class MovieDiscoverActivity extends AppCompatActivity implements NetworkUtils.IMovieDownloadListener {
+public class MovieDiscoverActivity extends AppCompatActivity implements NetworkUtils.IMovieDownloadListener, MovieAdapter.IMovieClickListener {
     private static final String TAG = MovieDiscoverActivity.class.getSimpleName();
     private MovieAdapter mMovieAdapter;
     private RecyclerView mRecyclerView;
@@ -31,7 +35,7 @@ public class MovieDiscoverActivity extends AppCompatActivity implements NetworkU
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movie_discovery);
 
-        mMovieAdapter = new MovieAdapter(this);
+        mMovieAdapter = new MovieAdapter(this, this);
         mRecyclerView = (RecyclerView) findViewById(R.id.rvMovies);
         mContentLoadingProgressBar = (ContentLoadingProgressBar) findViewById(R.id.clProgressBar);
 
@@ -43,7 +47,7 @@ public class MovieDiscoverActivity extends AppCompatActivity implements NetworkU
         String apiKey = getString(R.string.api_key);
         String url = null;
         try {
-             url = NetworkUtils.buildUrl("movie/popular", apiKey, "1");
+             url = NetworkUtils.buildUrl(getString(R.string.popular_path), apiKey, "1");
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -55,7 +59,6 @@ public class MovieDiscoverActivity extends AppCompatActivity implements NetworkU
 
     @Override
     public void onResponse(String response) {
-        //TODO Dismiss loading indicator
         if (response != null){
             showData();
             MovieApiResult apiResult = new Gson().fromJson(response, MovieApiResult.class);
@@ -67,9 +70,8 @@ public class MovieDiscoverActivity extends AppCompatActivity implements NetworkU
     @Override
     public void onErrorResponse(VolleyError error) {
         if (error != null){
-            Log.d(TAG, error.toString());
-        }else{
-            Log.d(TAG, getString(R.string.generic_error));
+            showError(getString(R.string.generic_error));
+            Log.e(TAG, error.toString());
         }
     }
 
@@ -83,7 +85,59 @@ public class MovieDiscoverActivity extends AppCompatActivity implements NetworkU
         mRecyclerView.setVisibility(View.INVISIBLE);
     }
 
+    private void showError(String error){
+        mContentLoadingProgressBar.setVisibility(View.INVISIBLE);
+        mRecyclerView.setVisibility(View.VISIBLE);
+        String genericErrorMessage = getString(R.string.generic_error);
+        if (error == null){
+            error = genericErrorMessage;
+        }
+        Toast.makeText(this, error ,Toast.LENGTH_LONG).show();
+    }
 
-    //TODO Create settings
-    //TODO Change filter on settings
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.movie_discovery, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        String path = null;
+
+        switch (id){
+            case R.id.action_popular:
+                path = getString(R.string.popular_path);
+                break;
+            case R.id.action_top_rated:
+                path = getString(R.string.top_rated_path);
+                break;
+        }
+
+        String apiKey = getString(R.string.api_key);
+        String url = null;
+        try {
+            url = NetworkUtils.buildUrl(path, apiKey, "1");
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
+        showLoading();
+        mMovieAdapter.setMovieData(null);
+        NetworkUtils.getInstance(this).onGetResponseFromHttpUrl(this, url);
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onItemClick(int position) {
+        if (mMovies == null) return;
+        Movie movie = mMovies.get(position);
+        Intent startDetailActivity = new Intent(this, MovieDetailActivity.class);
+        String movieJson = new Gson().toJson(movie);
+        startDetailActivity.putExtra(Intent.EXTRA_TEXT, movieJson);
+        startActivity(startDetailActivity);
+    }
 }

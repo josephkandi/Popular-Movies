@@ -1,9 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.peruzal.popularmovies.activities.MovieDetailActivity">
+    <ImageView
+        android:id="@+id/ivPoster"
+        android:scaleType="fitXY"
+        tools:src="@drawable/placeholder"
+        android:layout_width="match_parent"
+        android:layout_height="350dp" />
+    <RelativeLayout
+        android:padding="@dimen/padding"
+        android:id="@+id/content"
+        android:layout_below="@id/ivPoster"
+        android:layout_marginTop="-100dp"
+        android:background="#a4000000"
+        android:layout_width="match_parent"
+        android:layout_height="100dp">
 
-</android.support.constraint.ConstraintLayout>
+        <TextView
+            android:id="@+id/tvTitle"
+            android:gravity="center"
+            style="@style/TextAppearance.AppCompat.Large.Inverse"
+            android:layout_centerHorizontal="true"
+            tools:text="Guardians of the Galaxy Vol. 2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <RatingBar
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
+            android:numStars="10"
+            android:id="@+id/rbVote"
+            style="@style/RatingBar"
+            android:layout_gravity="bottom|right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:layout_alignParentBottom="true"
+            style="@style/Base.TextAppearance.AppCompat.Medium.Inverse"
+            android:layout_gravity="left|bottom"
+            android:id="@+id/tvDate"
+            tools:text="Dec 2014"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+    </RelativeLayout>
+
+    <ScrollView
+        android:layout_weight="1"
+        android:layout_below="@id/content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <TextView
+            android:id="@+id/tvPlot"
+            android:padding="@dimen/padding"
+            tools:text="The Guardians must fight to keep their newfound family together as they unravel the mysteries of Peter Quill's true parentage."
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </ScrollView>
+</RelativeLayout>
+
+

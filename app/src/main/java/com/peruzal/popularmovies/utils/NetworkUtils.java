@@ -9,6 +9,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.peruzal.popularmovies.BuildConfig;
+import com.peruzal.popularmovies.R;
 
 import java.net.MalformedURLException;
 
@@ -64,6 +65,16 @@ public class NetworkUtils {
                     .appendQueryParameter(QUERY_PARAM_LANGUAGE, language)
                     .build()
                     .toString();
+    }
+
+    public static String buildPostImageUrl(Context context, String posterPath){
+        String apiKey = context.getString(R.string.api_key);
+        String movieUrl = Uri.parse(NetworkUtils.BASE_IMAGE_URL).buildUpon()
+                .appendEncodedPath(posterPath)
+                .appendQueryParameter(NetworkUtils.QUERY_PARAM_API_KEY, apiKey)
+                .build()
+                .toString();
+        return movieUrl;
     }
 
     public interface IMovieDownloadListener {
