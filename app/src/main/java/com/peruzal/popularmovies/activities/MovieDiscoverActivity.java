@@ -1,24 +1,16 @@
 package com.peruzal.popularmovies.activities;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
-import com.google.gson.Gson;
 import com.peruzal.popularmovies.R;
-import com.peruzal.popularmovies.model.MovieApiResult;
+import com.peruzal.popularmovies.utils.NetworkUtils;
 
-import org.json.JSONObject;
+import java.net.MalformedURLException;
 
-public class MovieDiscoverActivity extends AppCompatActivity {
-    public static final String BASE_API_URL = "https://api.themoviedb.org/3/movie";
+public class MovieDiscoverActivity extends AppCompatActivity implements NetworkUtils.IMovieDownloadListener {
     private static final String TAG = MovieDiscoverActivity.class.getSimpleName();
 
     @Override
@@ -26,29 +18,32 @@ public class MovieDiscoverActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movie_discovery);
 
-        RequestQueue requestQueue = Volley.newRequestQueue(this);
-        String url = buildUrl("popular", "1", this);
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                Log.d(TAG, response.toString());
-                MovieApiResult apiResult = new Gson().fromJson(response.toString(),MovieApiResult.class);
-                if (apiResult != null){
-                    Log.d(TAG, "Total movies " + apiResult.movies.size());
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.d(TAG, error.getLocalizedMessage());
-            }
-        });
+        String apiKey = getString(R.string.api_key);
+        String url = null;
+        try {
+             url = NetworkUtils.buildUrl("movie/popular", apiKey, "1");
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
 
-        requestQueue.add(request);
+        if (url == null) return;
+
+        NetworkUtils.getInstance(this).onGetResponseFromHttpUrl(this,url);
     }
 
-    public static String buildUrl(String segment, String page, Context context){
-        String apiKey = context.getString(R.string.api_key);
-        return String.format("%s/%s?api_key=%s&page=%s", BASE_API_URL, segment, apiKey, page);
+    @Override
+    public void onResponse(String response) {
+        if (response != null){
+            Log.d(TAG, response);
+        }
+    }
+
+    @Override
+    public void onErrorResponse(VolleyError error) {
+        if (error != null){
+            Log.d(TAG, error.toString());
+        }else{
+            Log.d(TAG, getString(R.string.generic_error));
+        }
     }
 }
