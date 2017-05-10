@@ -18,10 +18,11 @@ import java.net.MalformedURLException;
 
 public class NetworkUtils {
     private static final String TAG = NetworkUtils.class.getSimpleName();
-    private static final String QUERY_PARAM_API_KEY = "api_key";
-    private static final String QUERY_PARAM_PAGE = "page";
-    private static final String QUERY_PARAM_LANGUAGE = "language";
-    private static final String BASE_API_URL = "https://api.themoviedb.org/3/";
+    public static final String QUERY_PARAM_API_KEY = "api_key";
+    public static final String QUERY_PARAM_PAGE = "page";
+    public static final String QUERY_PARAM_LANGUAGE = "language";
+    public static final String BASE_API_URL = "https://api.themoviedb.org/3";
+    public static final String BASE_IMAGE_URL = "http://image.tmdb.org/t/p/w185";
     private static final String language = "en-US";
     private IMovieDownloadListener mListener;
     private static NetworkUtils mInstance;

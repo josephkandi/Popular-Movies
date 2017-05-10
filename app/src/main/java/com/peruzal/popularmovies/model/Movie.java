@@ -34,4 +34,9 @@ public class Movie
     @SerializedName("vote_average")
     public double voteAverage;
 
+    @Override
+    public String toString() {
+        return String.format("Title:%s Poster:%s Backdrop:%s Overview:%s", originalTitle, posterPath, backdropPath, overview);
+
+    }
 }
