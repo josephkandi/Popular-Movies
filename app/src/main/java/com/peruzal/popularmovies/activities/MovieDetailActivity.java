@@ -1,6 +1,7 @@
 package com.peruzal.popularmovies.activities;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
@@ -10,11 +11,12 @@ import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
 import com.peruzal.popularmovies.R;
 import com.peruzal.popularmovies.model.Movie;
 import com.peruzal.popularmovies.utils.NetworkUtils;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.Picasso;
 
 public class MovieDetailActivity extends AppCompatActivity {
     private static final String TAG = MovieDetailActivity.class.getSimpleName();
@@ -22,7 +24,7 @@ public class MovieDetailActivity extends AppCompatActivity {
     private RatingBar mVote;
     private TextView mDateTextView;
     private TextView mPlotTextView;
-    private TextView mTitleTextView;
+    private TextView mVoteTextView;
 
 
     @Override
@@ -33,7 +35,7 @@ public class MovieDetailActivity extends AppCompatActivity {
         mVote = (RatingBar)findViewById(R.id.rbVote);
         mDateTextView = (TextView)findViewById(R.id.tvDate);
         mPlotTextView = (TextView)findViewById(R.id.tvPlot);
-        mTitleTextView = (TextView)findViewById(R.id.tvTitle);
+        mVoteTextView = (TextView)findViewById(R.id.tvVote);
 
 
         Intent intent = getIntent();
@@ -45,13 +47,26 @@ public class MovieDetailActivity extends AppCompatActivity {
             getSupportActionBar().setTitle(movie.title);
         }
 
-        mTitleTextView.setText(movie.title);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            mPosterImageView.setTransitionName(movie.posterPath);
+        }
         mPlotTextView.setText(movie.overview);
         mDateTextView.setText(movie.releaseDate);
         mVote.setRating((float) movie.voteAverage);
+        mVoteTextView.setText(Double.toString(movie.voteAverage));
 
         String posterImageurl = NetworkUtils.buildPostImageUrl(this, movie.posterPath);
-        Glide.with(this).load(posterImageurl).placeholder(R.drawable.placeholder).into(mPosterImageView);
+        Picasso.with(this).load(posterImageurl).placeholder(R.drawable.placeholder).into(mPosterImageView, new Callback() {
+            @Override
+            public void onSuccess() {
+                supportStartPostponedEnterTransition();
+            }
+
+            @Override
+            public void onError() {
+                supportStartPostponedEnterTransition();
+            }
+        });
         Log.d(TAG,movie.backdropPath);
     }
 

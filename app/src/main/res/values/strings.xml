@@ -1,8 +1,8 @@
 <resources>
     <string name="app_name" translatable="false">Popular Movies</string>
     <string name="generic_error">Unknown network error</string>
-    <string name="item_top_rated">Top Rated</string>
-    <string name="item_popular">Popular</string>
+    <string name="item_top_rated">Top Rated Movies</string>
+    <string name="item_popular">Popular Movies</string>
     <string name="popular_path" translatable="false">movie/popular</string>
     <string name="top_rated_path" translatable="false">movie/top_rated</string>
 </resources>

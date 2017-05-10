@@ -8,11 +8,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
-import com.bumptech.glide.Glide;
 import com.peruzal.popularmovies.BuildConfig;
 import com.peruzal.popularmovies.R;
 import com.peruzal.popularmovies.model.Movie;
 import com.peruzal.popularmovies.utils.NetworkUtils;
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -45,7 +45,9 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
             Log.d(TAG, movieUrl);
             Log.d(TAG, movie.toString());
         }
-        Glide.with(mContext)
+
+        //ViewCompat.setTransitionName(holder.mPosterImageView, movie.posterPath);
+        Picasso.with(mContext)
                 .load(movieUrl)
                 .placeholder(R.drawable.placeholder)
                 .into(holder.mPosterImageView);

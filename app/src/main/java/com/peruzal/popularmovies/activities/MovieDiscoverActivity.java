@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.widget.ContentLoadingProgressBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -43,6 +44,7 @@ public class MovieDiscoverActivity extends AppCompatActivity implements NetworkU
         mRecyclerView.setLayoutManager(gridLayoutManager);
         mRecyclerView.setAdapter(mMovieAdapter);
         mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
         String apiKey = getString(R.string.api_key);
         String url = null;
@@ -106,13 +108,16 @@ public class MovieDiscoverActivity extends AppCompatActivity implements NetworkU
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         String path = null;
+        String title = null;
 
         switch (id){
             case R.id.action_popular:
                 path = getString(R.string.popular_path);
+                title = getString(R.string.item_popular);
                 break;
             case R.id.action_top_rated:
                 path = getString(R.string.top_rated_path);
+                title = getString(R.string.item_top_rated);
                 break;
         }
 
@@ -127,6 +132,10 @@ public class MovieDiscoverActivity extends AppCompatActivity implements NetworkU
         showLoading();
         mMovieAdapter.setMovieData(null);
         NetworkUtils.getInstance(this).onGetResponseFromHttpUrl(this, url);
+
+        if (getSupportActionBar() != null){
+            getSupportActionBar().setTitle(title);
+        }
 
         return super.onOptionsItemSelected(item);
     }
