@@ -1,30 +1,40 @@
 package com.peruzal.popularmovies.activities;
 
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.peruzal.popularmovies.R;
+import com.peruzal.popularmovies.data.MovieContract;
+import com.peruzal.popularmovies.data.MovieDbHelper;
 import com.peruzal.popularmovies.model.Movie;
 import com.peruzal.popularmovies.utils.NetworkUtils;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
-public class MovieDetailActivity extends AppCompatActivity {
+public class MovieDetailActivity extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = MovieDetailActivity.class.getSimpleName();
     private ImageView mPosterImageView;
     private RatingBar mVote;
     private TextView mDateTextView;
     private TextView mPlotTextView;
     private TextView mVoteTextView;
+    private ImageView mFavoriteImageView;
+    private Movie mMovie;
+    private boolean isFavorite = false;
+    private SQLiteDatabase db;
 
 
     @Override
@@ -36,26 +46,33 @@ public class MovieDetailActivity extends AppCompatActivity {
         mDateTextView = (TextView)findViewById(R.id.tvDate);
         mPlotTextView = (TextView)findViewById(R.id.tvPlot);
         mVoteTextView = (TextView)findViewById(R.id.tvVote);
+        mFavoriteImageView = (ImageView)findViewById(R.id.img_favorite);
 
+        db = new MovieDbHelper(this).getWritableDatabase();
 
         Intent intent = getIntent();
         if (intent == null) return;
         if (!intent.hasExtra(Intent.EXTRA_TEXT)) return;
-        Movie movie = new Gson().fromJson(intent.getStringExtra(Intent.EXTRA_TEXT), Movie.class);
+        mMovie = new Gson().fromJson(intent.getStringExtra(Intent.EXTRA_TEXT), Movie.class);
         if (getSupportActionBar() != null){
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setTitle(movie.title);
+            getSupportActionBar().setTitle(mMovie.title);
         }
+
+        setupFavoriteMovie();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            mPosterImageView.setTransitionName(movie.posterPath);
+            mPosterImageView.setTransitionName(mMovie.posterPath);
         }
-        mPlotTextView.setText(movie.overview);
-        mDateTextView.setText(movie.releaseDate);
-        mVote.setRating((float) movie.voteAverage);
-        mVoteTextView.setText(Double.toString(movie.voteAverage));
+        mPlotTextView.setText(mMovie.overview);
+        mDateTextView.setText(mMovie.releaseDate);
+        mVote.setRating((float) mMovie.voteAverage);
+        mVoteTextView.setText(Double.toString(mMovie.voteAverage));
+        mFavoriteImageView.setOnClickListener(this);
 
-        String posterImageurl = NetworkUtils.buildPostImageUrl(this, movie.posterPath);
+        toggleFavoriteImageView();
+
+        String posterImageurl = NetworkUtils.buildPostImageUrl(this, mMovie.posterPath);
         Picasso.with(this).load(posterImageurl).placeholder(R.drawable.placeholder).into(mPosterImageView, new Callback() {
             @Override
             public void onSuccess() {
@@ -67,7 +84,20 @@ public class MovieDetailActivity extends AppCompatActivity {
                 supportStartPostponedEnterTransition();
             }
         });
-        Log.d(TAG,movie.backdropPath);
+        Log.d(TAG,mMovie.backdropPath);
+    }
+
+    private void setupFavoriteMovie() {
+        Cursor cursor = db.query(MovieContract.MovieEntry.TABLE_NAME,null, MovieContract.MovieEntry._ID + " = ?", new String[]{ String.valueOf(mMovie.id)},null,null ,null);
+        if (cursor == null)
+            return;
+
+        if (cursor.moveToFirst()){
+            isFavorite = true;
+            toggleFavoriteImageView();
+        }else{
+            isFavorite = false;
+        }
     }
 
     @Override
@@ -76,5 +106,49 @@ public class MovieDetailActivity extends AppCompatActivity {
             NavUtils.navigateUpFromSameTask(this);
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onClick(View view) {
+        int id = view.getId();
+        if (id == R.id.img_favorite){
+            inserOrRemoveFavoriteMovie();
+            toggleFavoriteImageView();
+        }
+    }
+
+    private void inserOrRemoveFavoriteMovie() {
+        if (isFavorite){
+            removeMovieFromDb();
+        }else{
+            insertMovieIntoDb();
+        }
+        isFavorite = !isFavorite;
+    }
+
+    private void toggleFavoriteImageView() {
+        if (isFavorite){
+            mFavoriteImageView.setImageResource(R.drawable.ic_favorite_white_24dp);
+        }else{
+            mFavoriteImageView.setImageResource(R.drawable.ic_favorite_border_white_24dp);
+        }
+    }
+
+    private void insertMovieIntoDb() {
+        ContentValues values = new ContentValues();
+        values.put(MovieContract.MovieEntry._ID, mMovie.id);
+        long id = db.insertWithOnConflict (MovieContract.MovieEntry.TABLE_NAME,null,values, SQLiteDatabase.CONFLICT_IGNORE);
+        if (id != -1){
+            Log.d(TAG, "Inserted movie with id " + id);
+        }else{
+            Log.d(TAG, "Movie not inserted, id " + id);
+        }
+    }
+
+    private void removeMovieFromDb() {
+        long id = db.delete(MovieContract.MovieEntry.TABLE_NAME, MovieContract.MovieEntry._ID + " = ?",new String[]{ String.valueOf(mMovie.id)});
+        if (id != -1){
+            Log.d(TAG, "Removed movie from db");
+        }
     }
 }
