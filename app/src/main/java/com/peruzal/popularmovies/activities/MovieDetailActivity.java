@@ -1,9 +1,11 @@
 package com.peruzal.popularmovies.activities;
 
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
@@ -88,7 +90,7 @@ public class MovieDetailActivity extends AppCompatActivity implements View.OnCli
     }
 
     private void setupFavoriteMovie() {
-        Cursor cursor = db.query(MovieContract.MovieEntry.TABLE_NAME,null, MovieContract.MovieEntry._ID + " = ?", new String[]{ String.valueOf(mMovie.id)},null,null ,null);
+        Cursor cursor = getContentResolver().query(MovieContract.MovieEntry.CONTENT_URI,null, MovieContract.MovieEntry._ID +" = ?", new String[]{String.valueOf(mMovie.id)}, null );
         if (cursor == null)
             return;
 
@@ -137,7 +139,8 @@ public class MovieDetailActivity extends AppCompatActivity implements View.OnCli
     private void insertMovieIntoDb() {
         ContentValues values = new ContentValues();
         values.put(MovieContract.MovieEntry._ID, mMovie.id);
-        long id = db.insertWithOnConflict (MovieContract.MovieEntry.TABLE_NAME,null,values, SQLiteDatabase.CONFLICT_IGNORE);
+        Uri uri = getContentResolver().insert(MovieContract.MovieEntry.CONTENT_URI,values);
+        long id = ContentUris.parseId(uri);
         if (id != -1){
             Log.d(TAG, "Inserted movie with id " + id);
         }else{
@@ -146,7 +149,7 @@ public class MovieDetailActivity extends AppCompatActivity implements View.OnCli
     }
 
     private void removeMovieFromDb() {
-        long id = db.delete(MovieContract.MovieEntry.TABLE_NAME, MovieContract.MovieEntry._ID + " = ?",new String[]{ String.valueOf(mMovie.id)});
+        long id = getContentResolver().delete(MovieContract.MovieEntry.CONTENT_URI,MovieContract.MovieEntry._ID + " = ?",new String[]{ String.valueOf(mMovie.id)});
         if (id != -1){
             Log.d(TAG, "Removed movie from db");
         }

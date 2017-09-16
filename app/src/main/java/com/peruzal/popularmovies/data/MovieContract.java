@@ -1,5 +1,6 @@
 package com.peruzal.popularmovies.data;
 
+import android.net.Uri;
 import android.provider.BaseColumns;
 
 /**
@@ -7,7 +8,14 @@ import android.provider.BaseColumns;
  */
 
 public class MovieContract {
+
+    public static final String AUTHORITY = "com.peruzal.popularmovies";
+    public static final Uri BASE_URI = Uri.parse("content://" + AUTHORITY);
+
     public static final  class MovieEntry implements BaseColumns {
+        public static final String PATH_MOVIE = MovieEntry.TABLE_NAME;
+        public static final Uri CONTENT_URI = BASE_URI.buildUpon().appendPath(PATH_MOVIE).build();
+
         public static final String TABLE_NAME = "movies";
         public static final String COLUMN_POSTER_PATH = "poster_path";
         public static final String COLUMN_IS_ADULT = "is_adult";
