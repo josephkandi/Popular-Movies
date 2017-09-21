@@ -19,7 +19,7 @@ public class Movie
     public String releaseDate;
     @SerializedName("genre_ids")
     public List<Integer> genreIds;
-    public int id;
+    public String id;
     @SerializedName("original_title")
     public String originalTitle;
     @SerializedName("original_language")
@@ -33,4 +33,9 @@ public class Movie
     public boolean video;
     @SerializedName("vote_average")
     public double voteAverage;
+
+    @Override
+    public String toString() {
+        return String.format("Movie Id : %s, title : %s, backdropPath %s, voteCount : %s", id, title, backdropPath, voteCount);
+    }
 }

@@ -14,6 +14,7 @@ import com.peruzal.popularmovies.model.Movie;
 import com.peruzal.popularmovies.utils.NetworkUtils;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -22,12 +23,12 @@ import java.util.List;
 
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHolder>{
     private static final String TAG = MovieAdapter.class.getSimpleName();
-    private List<Movie> mMovies;
+    private List<Movie> mMovies = new ArrayList<>();
     private Context mContext;
     private IMovieClickListener mMovieClickLister;
 
-    public MovieAdapter(Context mContext, IMovieClickListener clickListener) {
-        this.mContext = mContext;
+    public MovieAdapter(IMovieClickListener clickListener) {
+        this.mContext = (Context) clickListener;
         this.mMovieClickLister = clickListener;
     }
 
@@ -47,7 +48,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
         }
 
         //ViewCompat.setTransitionName(holder.mPosterImageView, movie.posterPath);
-        Picasso.with(mContext)
+        Picasso.with((Context) mMovieClickLister)
                 .load(movieUrl)
                 .placeholder(R.drawable.placeholder)
                 .into(holder.mPosterImageView);
@@ -75,7 +76,12 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
     }
 
     public void setMovieData(List<Movie> movies){
-        mMovies = movies;
+        mMovies.clear();
+
+        if (movies != null){
+            mMovies.addAll(movies);
+        }
+
         notifyDataSetChanged();
     }
 

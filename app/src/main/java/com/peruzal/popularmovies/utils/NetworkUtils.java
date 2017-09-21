@@ -22,9 +22,12 @@ public class NetworkUtils {
     public static final String QUERY_PARAM_API_KEY = "api_key";
     public static final String QUERY_PARAM_PAGE = "page";
     public static final String QUERY_PARAM_LANGUAGE = "language";
-    public static final String BASE_API_URL = "https://api.themoviedb.org/3";
+    public static final String BASE_API_URL = "https://api.themoviedb.org/3/";
     public static final String BASE_IMAGE_URL = "http://image.tmdb.org/t/p/w185";
     private static final String language = "en-US";
+    private static final String QUERY_PATH_VIDEOS = "videos";
+    private static final String QUERY_PATH_MOVIE = "movie";
+    private static final String QUERY_PATH_REVIEWS = "reviews";
     private IMovieDownloadListener mListener;
     private static NetworkUtils mInstance;
 
@@ -52,8 +55,9 @@ public class NetworkUtils {
             }
         });
         if (BuildConfig.DEBUG) {
-            Log.d(TAG, "*********Request url" + request.getUrl());
+            Log.d(TAG, "*********Request url " + request.getUrl());
         }
+
         VolleySingleton.getInstance(context).addToRequestQueue(request);
     }
 
@@ -68,13 +72,39 @@ public class NetworkUtils {
     }
 
     public static String buildPostImageUrl(Context context, String posterPath){
-        String apiKey = context.getString(R.string.api_key);
-        String movieUrl = Uri.parse(NetworkUtils.BASE_IMAGE_URL).buildUpon()
+        String apiKey = getApiKey(context);
+        return Uri.parse(NetworkUtils.BASE_IMAGE_URL).buildUpon()
                 .appendEncodedPath(posterPath)
                 .appendQueryParameter(NetworkUtils.QUERY_PARAM_API_KEY, apiKey)
                 .build()
                 .toString();
-        return movieUrl;
+    }
+
+    public static String buildVideosUrl(Context context, String movieId){
+        String apiKey = getApiKey(context);
+        return Uri.parse(NetworkUtils.BASE_API_URL).buildUpon()
+                .appendEncodedPath(QUERY_PATH_MOVIE)
+                .appendPath(movieId)
+                .appendPath(NetworkUtils.QUERY_PATH_VIDEOS)
+                .appendQueryParameter(NetworkUtils.QUERY_PARAM_API_KEY, apiKey)
+                .build()
+                .toString();
+    }
+
+    public  static String buildReviewsUrl(Context context, String movieId, String page){
+        String apiKey = getApiKey(context);
+        return Uri.parse(BASE_API_URL).buildUpon()
+                .appendEncodedPath(QUERY_PATH_MOVIE)
+                .appendEncodedPath(movieId)
+                .appendPath(NetworkUtils.QUERY_PATH_REVIEWS)
+                .appendQueryParameter(QUERY_PARAM_PAGE, page)
+                .appendQueryParameter(QUERY_PARAM_API_KEY,apiKey)
+                .build()
+                .toString();
+    }
+
+    private static String getApiKey(Context context){
+        return context.getString(R.string.api_key);
     }
 
     public interface IMovieDownloadListener {
